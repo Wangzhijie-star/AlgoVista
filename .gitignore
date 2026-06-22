@@ -5,10 +5,14 @@
 backend/target/
 backend/.mvn/wrapper/maven-wrapper.jar
 backend/src/main/resources/application-local.yml
+maven-settings.local.xml
 
 frontend/node_modules/
 frontend/dist/
 frontend/.env.local
 
+.m2/
+
 *.log
 *.tmp
+*.tsbuildinfo
