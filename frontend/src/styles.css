@@ -1,0 +1,301 @@
+:root {
+  color: #172033;
+  background: #f6f8fb;
+  font-family: Inter, "Microsoft YaHei", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e5eaf2;
+  display: flex;
+  height: 64px;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 20px;
+}
+
+.hero {
+  align-items: center;
+  display: flex;
+  min-height: calc(100vh - 64px);
+  padding: 64px 10vw;
+}
+
+.hero h1,
+.page h1,
+.algorithm-info h1,
+.auth-panel h1 {
+  font-size: 40px;
+  line-height: 1.15;
+  margin: 8px 0 16px;
+}
+
+.hero-copy {
+  color: #526179;
+  font-size: 18px;
+  max-width: 640px;
+}
+
+.eyebrow,
+.difficulty {
+  color: #2f6fed;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.primary-action,
+.ghost-button,
+.link-button,
+.player-controls button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 700;
+  justify-content: center;
+  padding: 11px 18px;
+}
+
+.primary-action {
+  background: #2f6fed;
+  color: white;
+  margin-top: 16px;
+}
+
+.ghost-button,
+.player-controls button {
+  background: #eaf0fb;
+  color: #24456f;
+}
+
+.link-button {
+  background: transparent;
+  color: #2f6fed;
+  padding-left: 0;
+}
+
+.page {
+  padding: 48px 8vw;
+}
+
+.page.narrow {
+  max-width: 720px;
+}
+
+.section-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.category-tabs button {
+  background: white;
+  border: 1px solid #d9e1ef;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 9px 16px;
+}
+
+.category-tabs .active {
+  background: #172033;
+  color: white;
+}
+
+.algorithm-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.algorithm-card,
+.auth-panel,
+.visual-panel,
+.profile-block {
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+}
+
+.algorithm-card {
+  padding: 20px;
+}
+
+.algorithm-card h2 {
+  margin: 10px 0;
+}
+
+.algorithm-card p,
+.algorithm-info p,
+.step-description {
+  color: #526179;
+  line-height: 1.7;
+}
+
+.auth-page {
+  display: grid;
+  min-height: calc(100vh - 64px);
+  place-items: center;
+  padding: 32px;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 16px;
+  max-width: 420px;
+  padding: 28px;
+  width: 100%;
+}
+
+.auth-panel label {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-panel input {
+  border: 1px solid #d9e1ef;
+  border-radius: 8px;
+  padding: 11px 12px;
+}
+
+.error-text {
+  color: #c0392b;
+}
+
+.detail-layout {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  padding: 48px 8vw;
+}
+
+.algorithm-info {
+  align-self: start;
+}
+
+.visual-panel {
+  min-height: 480px;
+  padding: 24px;
+}
+
+.bars {
+  align-items: end;
+  display: flex;
+  gap: 12px;
+  height: 240px;
+}
+
+.bar {
+  align-items: end;
+  background: #86aaf5;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  display: flex;
+  font-weight: 800;
+  justify-content: center;
+  min-width: 48px;
+  padding: 8px;
+  transition: height 180ms ease, background 180ms ease;
+}
+
+.bar.active {
+  background: #f59e42;
+}
+
+.player-controls {
+  display: flex;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.player-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.empty-state {
+  color: #6b7890;
+  display: grid;
+  min-height: 240px;
+  place-items: center;
+}
+
+.code-panel {
+  background: #111827;
+  border-radius: 8px;
+  color: #dbeafe;
+  overflow: auto;
+  padding: 16px;
+}
+
+.code-panel code {
+  display: block;
+  padding: 4px 8px;
+}
+
+.code-panel .highlight {
+  background: #1d4ed8;
+  border-radius: 4px;
+}
+
+.profile-block {
+  padding: 24px;
+}
+
+@media (max-width: 820px) {
+  .topbar {
+    padding: 0 18px;
+  }
+
+  .detail-layout {
+    grid-template-columns: 1fr;
+    padding: 32px 20px;
+  }
+
+  .page {
+    padding: 32px 20px;
+  }
+}

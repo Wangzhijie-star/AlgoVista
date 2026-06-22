@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: algovista-backend
+  profiles:
+    active: local
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+        http-only: true
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto

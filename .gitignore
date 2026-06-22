@@ -1,0 +1,14 @@
+.idea/
+.vscode/
+*.iml
+
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/src/main/resources/application-local.yml
+
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+*.log
+*.tmp
