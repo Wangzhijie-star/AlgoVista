@@ -19,7 +19,9 @@
           '--delay': `${index * 50}ms`
         }"
       >
-        <span>{{ cube.value }}</span>
+        <div class="cuboid-face cuboid-front"><span>{{ cube.value }}</span></div>
+        <div class="cuboid-face cuboid-right"></div>
+        <div class="cuboid-face cuboid-top"></div>
       </div>
     </div>
   </section>

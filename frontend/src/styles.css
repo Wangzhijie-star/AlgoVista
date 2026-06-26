@@ -893,7 +893,7 @@ input {
 .hover-cube-stage {
   align-items: end;
   display: flex;
-  gap: 28px;
+  gap: 16px;
   height: 560px;
   justify-content: center;
   perspective: 1000px;
@@ -905,21 +905,12 @@ input {
 
 .hover-cube {
   --h: 240px;
-  --depth: 38px;
-  --slant: 20px;
+  --depth: 36px;
   animation: hoverCubeIdle 3.2s ease-in-out infinite;
   animation-delay: var(--delay);
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 3px, transparent 3px calc(100% - 3px), rgba(0, 0, 0, 0.24) calc(100% - 3px)),
-    linear-gradient(180deg, rgba(165, 243, 252, 0.95), rgba(45, 212, 191, 0.78));
-  border: 2px solid rgba(5, 20, 38, 0.92);
-  border-bottom-width: 5px;
-  box-shadow: 0 0 34px rgba(45, 212, 191, 0.24), 0 30px 55px rgba(0, 0, 0, 0.45);
   color: #063344;
-  display: grid;
-  font-weight: 900;
+  flex: 0 0 92px;
   height: var(--h);
-  place-items: end center;
   position: relative;
   transform: translateY(0) rotateY(-7deg);
   transform-style: preserve-3d;
@@ -927,67 +918,83 @@ input {
   width: 92px;
 }
 
-.hover-cube::before,
-.hover-cube::after {
-  content: "";
+.cuboid-face {
   position: absolute;
   pointer-events: none;
 }
 
-.hover-cube::before {
+.cuboid-front {
+  align-items: end;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.28)),
-    linear-gradient(180deg, #43e2d8, #21a7b6);
-  border: 2px solid rgba(5, 20, 38, 0.9);
-  border-left: 0;
+    linear-gradient(90deg, rgba(7, 31, 44, 0.35) 0 4px, transparent 4px calc(100% - 4px), rgba(7, 31, 44, 0.35) calc(100% - 4px)),
+    linear-gradient(180deg, rgba(191, 255, 255, 0.96), rgba(45, 212, 191, 0.82));
+  border: 2px solid rgba(5, 20, 38, 0.95);
+  border-bottom-width: 5px;
+  box-shadow: inset 12px 0 20px rgba(255, 255, 255, 0.28), inset -10px 0 22px rgba(8, 145, 178, 0.28);
+  display: flex;
+  font-weight: 900;
   height: var(--h);
-  right: calc(var(--depth) * -1);
-  top: calc(var(--slant) * -1);
-  transform: skewY(-27deg);
-  transform-origin: left;
-  width: var(--depth);
+  inset: 0;
+  justify-content: center;
+  z-index: 3;
 }
 
-.hover-cube::after {
+.cuboid-right {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.26)),
+    linear-gradient(180deg, #38d5ca, #158f9f);
+  border: 2px solid rgba(5, 20, 38, 0.95);
+  border-left: 0;
+  height: var(--h);
+  left: 100%;
+  top: 0;
+  transform: skewY(-27deg);
+  transform-origin: left top;
+  width: var(--depth);
+  z-index: 2;
+}
+
+.cuboid-top {
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.55), transparent 68%),
-    linear-gradient(90deg, #adfbff, #5eead4);
+    linear-gradient(90deg, #c9ffff, #5eead4);
   border: 2px solid rgba(5, 20, 38, 0.9);
   border-bottom: 0;
   height: var(--depth);
-  left: 17px;
-  top: calc((var(--depth) + var(--slant)) * -1);
+  left: 0;
+  top: calc(var(--depth) * -1);
   transform: skewX(-63deg);
-  transform-origin: bottom;
-  width: 92px;
+  transform-origin: left bottom;
+  width: 100%;
+  z-index: 4;
 }
 
-.hover-cube span {
+.cuboid-front span {
   font-size: 18px;
   padding-bottom: 14px;
   transform: none;
   z-index: 1;
 }
 
-.hover-cube span::before,
-.hover-cube span::after {
+.cuboid-front span::before,
+.cuboid-front span::after {
   background: rgba(5, 20, 38, 0.55);
   content: "";
   position: absolute;
 }
 
-.hover-cube span::before {
+.cuboid-front span::before {
   bottom: 0;
   left: 12px;
   top: 0;
   width: 2px;
 }
 
-.hover-cube span::after {
+.cuboid-front span::after {
   bottom: 12px;
   height: 2px;
   left: 0;
-  right: -14px;
+  right: 0;
 }
 
 .hover-cube.hot {
