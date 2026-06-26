@@ -43,7 +43,10 @@ export const algorithmApi = {
   detail(id: number) {
     return request<Algorithm>(http.get(`/algorithms/${id}`))
   },
-  visualization(id: number) {
+  visualization(id: number, array?: number[]) {
+    if (array?.length) {
+      return request<VisualizationResult>(http.post(`/algorithms/${id}/visualization`, { array }))
+    }
     return request<VisualizationResult>(http.get(`/algorithms/${id}/visualization`))
   }
 }

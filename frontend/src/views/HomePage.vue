@@ -38,49 +38,43 @@
 
       <aside class="study-card">
         <div class="week-row">
-          <div class="today">
-            <span>MON</span>
-            <strong>今</strong>
-          </div>
-          <div v-for="day in weekDays" :key="day.label">
+          <div v-for="day in weekDays" :key="day.label" :class="{ today: day.isToday }">
             <span>{{ day.label }}</span>
-            <strong>{{ day.date }}</strong>
+            <strong>{{ day.isToday ? '今' : day.date }}</strong>
           </div>
         </div>
 
         <div class="daily-challenge">
-          <span>每日 1 题</span>
-          <strong>冒泡排序：相邻元素交换</strong>
-          <i></i>
+          <span>{{ userStore.user ? '今日学习状态' : '登录后记录学习' }}</span>
+          <strong>{{ todayStudied ? '今日已完成打卡' : '完成一次算法演示后自动打卡' }}</strong>
+          <i :class="{ checked: todayStudied }"></i>
         </div>
 
         <div class="study-stats">
           <div>
             <span>连续提交</span>
-            <strong>0 天</strong>
+            <strong>{{ currentStreak }} 天</strong>
           </div>
           <div>
-            <span>本月解决</span>
-            <strong>1 题</strong>
+            <span>本月学习</span>
+            <strong>{{ monthStudyDays }} 天</strong>
           </div>
           <div>
             <span>每日一题</span>
-            <strong>0 连胜</strong>
+            <strong>{{ dailyChallengeStreak }} 连胜</strong>
           </div>
         </div>
 
         <div class="heatmap">
           <span
-            v-for="(level, index) in heatmapLevels"
+            v-for="(day, index) in heatmapDays"
             :key="index"
-            :class="`level-${level}`"
+            :class="`level-${heatLevel(day.studyCount)}`"
+            :title="`${day.date}: ${day.studyCount} 次学习`"
           ></span>
         </div>
         <div class="month-labels">
-          <span>3月</span>
-          <span>4月</span>
-          <span>5月</span>
-          <span>6月</span>
+          <span v-for="month in monthLabels" :key="month">{{ month }}</span>
         </div>
         <button class="analysis-button">进展分析</button>
       </aside>
@@ -89,13 +83,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { algorithmApi, type Algorithm, type AlgorithmCategory } from '../api/algorithm'
+import { studyApi, type StudyCalendar, type StudyDay } from '../api/study'
+import { useUserStore } from '../stores/user'
 
+const userStore = useUserStore()
 const categories = ref<AlgorithmCategory[]>([])
 const algorithms = ref<Algorithm[]>([])
 const selectedCategoryId = ref<number | undefined>()
+const studyCalendar = ref<StudyCalendar | null>(null)
 const fallbackCategories: AlgorithmCategory[] = [
   { id: 1, name: '排序算法', sortOrder: 1 },
   { id: 2, name: '图算法', sortOrder: 2 }
@@ -138,15 +136,35 @@ const fallbackAlgorithms: Algorithm[] = [
     description: '图着色用于展示约束满足和回溯搜索的基本过程。'
   }
 ]
-const weekDays = [
-  { label: 'TUE', date: '23' },
-  { label: 'WED', date: '24' },
-  { label: 'THU', date: '25' },
-  { label: 'FRI', date: '26' },
-  { label: 'SAT', date: '27' },
-  { label: 'SUN', date: '28' }
-]
-const heatmapLevels = [0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 1, 0, 4, 0, 0, 0, 0, 2, 0, 3, 0, 0, 2, 0, 4, 0, 0, 0, 1, 0, 3, 4, 2, 0, 0, 4, 0, 0, 3, 0, 0, 0, 2, 0, 0, 4, 1, 0, 0, 0, 0, 3, 0, 2, 0, 0]
+
+const weekDays = computed(() => {
+  const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short' })
+  const today = new Date()
+  const monday = new Date(today)
+  const weekday = today.getDay() || 7
+  monday.setDate(today.getDate() - weekday + 1)
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(monday)
+    date.setDate(monday.getDate() + index)
+    return {
+      label: formatter.format(date).toUpperCase(),
+      date: date.getDate(),
+      isToday: date.toDateString() === today.toDateString()
+    }
+  })
+})
+const heatmapDays = computed(() => studyCalendar.value?.days ?? emptyStudyDays())
+const currentStreak = computed(() => studyCalendar.value?.currentStreak ?? 0)
+const monthStudyDays = computed(() => studyCalendar.value?.monthStudyDays ?? 0)
+const dailyChallengeStreak = computed(() => studyCalendar.value?.dailyChallengeStreak ?? 0)
+const todayStudied = computed(() => {
+  const today = toDateKey(new Date())
+  return heatmapDays.value.some((day) => day.date === today && day.studyCount > 0)
+})
+const monthLabels = computed(() => {
+  const labels = Array.from(new Set(heatmapDays.value.map((day) => `${Number(day.date.slice(5, 7))}月`)))
+  return labels.slice(-4)
+})
 
 function visualBars(slug: string) {
   if (slug === 'merge-sort') {
@@ -169,6 +187,7 @@ async function loadData() {
     categories.value = fallbackCategories
     algorithms.value = filterFallbackAlgorithms(selectedCategoryId.value)
   }
+  await loadStudyCalendar()
 }
 
 async function selectCategory(categoryId: number | undefined) {
@@ -186,5 +205,45 @@ function filterFallbackAlgorithms(categoryId: number | undefined) {
     : fallbackAlgorithms.filter((algorithm) => algorithm.categoryId === categoryId)
 }
 
-onMounted(loadData)
+async function loadStudyCalendar() {
+  if (!userStore.user) {
+    studyCalendar.value = null
+    return
+  }
+  try {
+    studyCalendar.value = await studyApi.calendar()
+  } catch {
+    studyCalendar.value = null
+  }
+}
+
+function emptyStudyDays(): StudyDay[] {
+  const today = new Date()
+  const start = new Date(today)
+  start.setDate(today.getDate() - 55)
+  return Array.from({ length: 56 }, (_, index) => {
+    const date = new Date(start)
+    date.setDate(start.getDate() + index)
+    return { date: toDateKey(date), studyCount: 0 }
+  })
+}
+
+function toDateKey(date: Date) {
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function heatLevel(studyCount: number) {
+  if (studyCount >= 4) {
+    return 4
+  }
+  return studyCount
+}
+
+onMounted(async () => {
+  await userStore.fetchMe()
+  await loadData()
+})
 </script>

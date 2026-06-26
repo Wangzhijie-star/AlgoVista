@@ -19,10 +19,21 @@
         <p>{{ algorithm.description }}</p>
       </div>
 
+      <div class="input-section">
+        <h2>参考用例</h2>
+        <label>
+          输入数组
+          <input v-model="inputText" placeholder="例如：5,3,8,4,2" />
+        </label>
+        <p class="input-hint">格式：2-12 个整数，用英文逗号分隔；每个数范围 1-20。</p>
+        <p v-if="inputError" class="error-text">{{ inputError }}</p>
+      </div>
+
       <div class="step-card" v-if="currentStep">
         <span>{{ currentStep.operationType }}</span>
         <strong>Step {{ currentStep.stepIndex + 1 }} / {{ steps.length }}</strong>
         <p>{{ currentStep.description }}</p>
+        <p v-if="recordMessage" class="record-message">{{ recordMessage }}</p>
       </div>
 
       <div class="player-controls">
@@ -64,6 +75,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { algorithmApi, type Algorithm, type VisualizationStep } from '../api/algorithm'
+import { studyApi } from '../api/study'
 
 const route = useRoute()
 const router = useRouter()
@@ -72,6 +84,10 @@ const steps = ref<VisualizationStep[]>([])
 const codeLines = ref<string[]>([])
 const stepIndex = ref(0)
 const error = ref('')
+const inputText = ref('5,3,8,4,2')
+const inputError = ref('')
+const recordMessage = ref('')
+const hasRecordedCurrentRun = ref(false)
 const currentStep = computed(() => steps.value[stepIndex.value])
 const displayCodeLines = computed(() => codeLines.value.length ? codeLines.value : [
   'for i from 0 to n - 2',
@@ -129,11 +145,18 @@ async function loadAlgorithm() {
 
 async function loadVisualization() {
   error.value = ''
+  inputError.value = ''
+  recordMessage.value = ''
+  const parsedInput = parseInput()
+  if (!parsedInput) {
+    return
+  }
   try {
-    const result = await algorithmApi.visualization(Number(route.params.id))
+    const result = await algorithmApi.visualization(Number(route.params.id), parsedInput)
     steps.value = result.steps
     codeLines.value = result.codeLines
     stepIndex.value = 0
+    hasRecordedCurrentRun.value = false
   } catch (err) {
     error.value = '请先登录后再使用算法可视化。'
     if (err instanceof Error && err.message !== '请先登录') {
@@ -143,8 +166,9 @@ async function loadVisualization() {
   }
 }
 
-function nextStep() {
+async function nextStep() {
   stepIndex.value = Math.min(stepIndex.value + 1, steps.value.length - 1)
+  await recordIfFinished()
 }
 
 function previousStep() {
@@ -153,6 +177,44 @@ function previousStep() {
 
 function resetPlayer() {
   stepIndex.value = 0
+  recordMessage.value = ''
+  hasRecordedCurrentRun.value = false
+}
+
+function parseInput() {
+  const values = inputText.value
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  if (values.length < 2 || values.length > 12) {
+    inputError.value = '请输入 2 到 12 个整数。'
+    return null
+  }
+
+  const numbers = values.map(Number)
+  if (numbers.some((value) => !Number.isInteger(value))) {
+    inputError.value = '数组只能包含整数，并使用英文逗号分隔。'
+    return null
+  }
+  if (numbers.some((value) => value < 1 || value > 20)) {
+    inputError.value = '每个数组元素必须在 1 到 20 之间。'
+    return null
+  }
+  return numbers
+}
+
+async function recordIfFinished() {
+  if (!steps.value.length || stepIndex.value !== steps.value.length - 1 || hasRecordedCurrentRun.value) {
+    return
+  }
+  try {
+    await studyApi.record(Number(route.params.id))
+    hasRecordedCurrentRun.value = true
+    recordMessage.value = '本次演示已完成，今日学习打卡已记录。'
+  } catch {
+    recordMessage.value = '演示已完成。登录后可记录学习打卡。'
+  }
 }
 
 onMounted(loadAlgorithm)

@@ -27,15 +27,26 @@ public class VisualizationService {
     }
 
     public VisualizationResponse getVisualization(Long algorithmId) {
+        return getVisualization(algorithmId, DEFAULT_BUBBLE_INPUT);
+    }
+
+    public VisualizationResponse getVisualization(Long algorithmId, List<Integer> input) {
         Algorithm algorithm = algorithmService.getAlgorithm(algorithmId);
         if (!"bubble-sort".equals(algorithm.getSlug())) {
             return placeholder(algorithm);
         }
-        return buildBubbleSort(algorithm);
+        return buildBubbleSort(algorithm, input == null || input.isEmpty() ? DEFAULT_BUBBLE_INPUT : input);
     }
 
-    private VisualizationResponse buildBubbleSort(Algorithm algorithm) {
-        List<Integer> arr = new ArrayList<>(DEFAULT_BUBBLE_INPUT);
+    private VisualizationResponse buildBubbleSort(Algorithm algorithm, List<Integer> input) {
+        if (input.size() < 2 || input.size() > 12) {
+            throw new BusinessException(400, "数组长度必须在 2 到 12 之间");
+        }
+        if (input.stream().anyMatch(value -> value == null || value < 1 || value > 20)) {
+            throw new BusinessException(400, "数组元素必须是 1 到 20 之间的整数");
+        }
+        List<Integer> normalizedInput = List.copyOf(input);
+        List<Integer> arr = new ArrayList<>(normalizedInput);
         List<VisualizationStep> steps = new ArrayList<>();
         int stepIndex = 0;
         steps.add(new VisualizationStep(stepIndex++, "初始数组准备完成", "init", List.copyOf(arr), List.of(), 1));
@@ -55,7 +66,7 @@ public class VisualizationService {
         }
 
         steps.add(new VisualizationStep(stepIndex, "排序完成", "done", List.copyOf(arr), List.of(), 1));
-        return new VisualizationResponse(algorithm.getId(), algorithm.getName(), DEFAULT_BUBBLE_INPUT, BUBBLE_CODE, steps);
+        return new VisualizationResponse(algorithm.getId(), algorithm.getName(), normalizedInput, BUBBLE_CODE, steps);
     }
 
     private VisualizationResponse placeholder(Algorithm algorithm) {
