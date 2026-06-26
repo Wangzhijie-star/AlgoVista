@@ -16,8 +16,6 @@
         :class="{ hot: activeIndex === index, near: Math.abs(activeIndex - index) === 1 }"
         :style="{
           '--h': `${cube.height}px`,
-          '--x': `${cube.x}px`,
-          '--z': `${cube.z}px`,
           '--delay': `${index * 50}ms`
         }"
       >
@@ -32,16 +30,14 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const stageRef = ref<HTMLElement | null>(null)
-const activeIndex = ref(4)
+const activeIndex = ref(2)
 const cubes = [
-  { value: 8, height: 112, x: -250, z: 38 },
-  { value: 4, height: 72, x: -180, z: -18 },
-  { value: 13, height: 164, x: -110, z: 24 },
-  { value: 6, height: 96, x: -40, z: -32 },
-  { value: 16, height: 190, x: 30, z: 18 },
-  { value: 10, height: 132, x: 100, z: -24 },
-  { value: 5, height: 84, x: 170, z: 30 },
-  { value: 12, height: 152, x: 240, z: -12 }
+  { value: 9, height: 230 },
+  { value: 5, height: 142 },
+  { value: 16, height: 330 },
+  { value: 8, height: 190 },
+  { value: 11, height: 246 },
+  { value: 6, height: 158 }
 ]
 
 function handlePointerMove(event: PointerEvent) {

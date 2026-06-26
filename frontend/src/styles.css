@@ -893,79 +893,113 @@ input {
 .hover-cube-stage {
   align-items: end;
   display: flex;
-  height: 520px;
+  gap: 28px;
+  height: 560px;
   justify-content: center;
   perspective: 1000px;
   position: relative;
-  transform: rotateX(58deg) rotateZ(-36deg);
+  transform: rotateX(2deg);
   transform-style: preserve-3d;
   z-index: 1;
 }
 
 .hover-cube {
-  --h: 120px;
-  --x: 0px;
-  --z: 0px;
-  animation: hoverCubeIdle 3s ease-in-out infinite;
+  --h: 240px;
+  --depth: 38px;
+  --slant: 20px;
+  animation: hoverCubeIdle 3.2s ease-in-out infinite;
   animation-delay: var(--delay);
-  background: linear-gradient(180deg, #38bdf8, #1d4ed8);
-  border: 1px solid rgba(219, 234, 254, 0.9);
-  box-shadow: 0 0 28px rgba(56, 189, 248, 0.28), 0 30px 55px rgba(0, 0, 0, 0.45);
-  color: #eff6ff;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 3px, transparent 3px calc(100% - 3px), rgba(0, 0, 0, 0.24) calc(100% - 3px)),
+    linear-gradient(180deg, rgba(165, 243, 252, 0.95), rgba(45, 212, 191, 0.78));
+  border: 2px solid rgba(5, 20, 38, 0.92);
+  border-bottom-width: 5px;
+  box-shadow: 0 0 34px rgba(45, 212, 191, 0.24), 0 30px 55px rgba(0, 0, 0, 0.45);
+  color: #063344;
   display: grid;
   font-weight: 900;
   height: var(--h);
-  margin: 0 10px;
   place-items: end center;
   position: relative;
-  transform: translate3d(0, 0, var(--z));
+  transform: translateY(0) rotateY(-7deg);
   transform-style: preserve-3d;
   transition: transform 220ms ease, height 220ms ease, filter 220ms ease, box-shadow 220ms ease;
-  width: 72px;
+  width: 92px;
 }
 
 .hover-cube::before,
 .hover-cube::after {
   content: "";
   position: absolute;
+  pointer-events: none;
 }
 
 .hover-cube::before {
-  background: linear-gradient(180deg, #2563eb, #172554);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.28)),
+    linear-gradient(180deg, #43e2d8, #21a7b6);
+  border: 2px solid rgba(5, 20, 38, 0.9);
+  border-left: 0;
   height: var(--h);
-  right: -24px;
-  top: 12px;
-  transform: skewY(45deg);
+  right: calc(var(--depth) * -1);
+  top: calc(var(--slant) * -1);
+  transform: skewY(-27deg);
   transform-origin: left;
-  width: 24px;
+  width: var(--depth);
 }
 
 .hover-cube::after {
-  background: linear-gradient(90deg, #7dd3fc, #60a5fa);
-  height: 24px;
-  left: 12px;
-  top: -24px;
-  transform: skewX(45deg);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.55), transparent 68%),
+    linear-gradient(90deg, #adfbff, #5eead4);
+  border: 2px solid rgba(5, 20, 38, 0.9);
+  border-bottom: 0;
+  height: var(--depth);
+  left: 17px;
+  top: calc((var(--depth) + var(--slant)) * -1);
+  transform: skewX(-63deg);
   transform-origin: bottom;
-  width: 72px;
+  width: 92px;
 }
 
 .hover-cube span {
   font-size: 18px;
   padding-bottom: 14px;
-  transform: rotateZ(36deg) rotateX(-58deg);
+  transform: none;
+  z-index: 1;
+}
+
+.hover-cube span::before,
+.hover-cube span::after {
+  background: rgba(5, 20, 38, 0.55);
+  content: "";
+  position: absolute;
+}
+
+.hover-cube span::before {
+  bottom: 0;
+  left: 12px;
+  top: 0;
+  width: 2px;
+}
+
+.hover-cube span::after {
+  bottom: 12px;
+  height: 2px;
+  left: 0;
+  right: -14px;
 }
 
 .hover-cube.hot {
   filter: brightness(1.28);
   height: calc(var(--h) + 46px);
-  box-shadow: 0 0 48px rgba(245, 158, 11, 0.62), 0 36px 70px rgba(0, 0, 0, 0.55);
-  transform: translate3d(0, -22px, 95px);
+  box-shadow: 0 0 52px rgba(45, 212, 191, 0.58), 0 36px 70px rgba(0, 0, 0, 0.55);
+  transform: translateY(-34px) rotateY(-7deg) scale(1.04);
 }
 
 .hover-cube.near {
   filter: brightness(1.16);
-  transform: translate3d(0, -12px, 45px);
+  transform: translateY(-18px) rotateY(-7deg);
 }
 
 @keyframes hoverCubeIdle {
