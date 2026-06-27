@@ -37,10 +37,7 @@ public class StudyRecordService {
             record.setStudiedDate(today);
             record.setStudyCount(1);
             studyRecordMapper.insert(record);
-            return;
         }
-        exists.setStudyCount(exists.getStudyCount() + 1);
-        studyRecordMapper.updateById(exists);
     }
 
     public StudyCalendarResponse getCalendar(Long userId) {

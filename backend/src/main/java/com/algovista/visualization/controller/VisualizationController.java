@@ -31,6 +31,6 @@ public class VisualizationController {
             @PathVariable Long id,
             @Valid @RequestBody VisualizationRequest request
     ) {
-        return ApiResponse.ok(visualizationService.getVisualization(id, request.array()));
+        return ApiResponse.ok(visualizationService.getVisualization(id, request));
     }
 }

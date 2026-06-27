@@ -23,6 +23,7 @@ export interface VisualizationStep {
   arrayState: number[]
   activeIndexes: number[]
   codeLine: number
+  metadata: Record<string, unknown>
 }
 
 export interface VisualizationResult {
@@ -43,9 +44,12 @@ export const algorithmApi = {
   detail(id: number) {
     return request<Algorithm>(http.get(`/algorithms/${id}`))
   },
-  visualization(id: number, array?: number[]) {
-    if (array?.length) {
-      return request<VisualizationResult>(http.post(`/algorithms/${id}/visualization`, { array }))
+  visualization(id: number, payload?: number[] | { graphText: string }) {
+    if (Array.isArray(payload) && payload.length) {
+      return request<VisualizationResult>(http.post(`/algorithms/${id}/visualization`, { array: payload }))
+    }
+    if (payload && !Array.isArray(payload)) {
+      return request<VisualizationResult>(http.post(`/algorithms/${id}/visualization`, payload))
     }
     return request<VisualizationResult>(http.get(`/algorithms/${id}/visualization`))
   }

@@ -1,45 +1,64 @@
 <template>
-  <section class="hero tech-hero">
-    <div class="hero-grid"></div>
-    <div class="hero-orbit hero-orbit-one"></div>
-    <div class="hero-orbit hero-orbit-two"></div>
-
-    <div class="hero-content">
-      <p class="eyebrow">ALGORITHM VISUALIZATION</p>
-      <h1>看见算法，理解每一步。</h1>
-      <p class="hero-copy">用动态柱形、代码高亮和步骤拆解，把抽象算法转化为可观察、可播放、可复盘的学习体验。</p>
+  <section class="landing-page" @pointermove="handlePointerMove" @pointerleave="resetPointer">
+    <div class="landing-bg"></div>
+    <div class="landing-content">
+      <p class="eyebrow">Algorithm Visualization</p>
+      <h1>每一步变化，都有迹可循。</h1>
+      <p class="landing-copy">
+        通过可视化演示跟踪数据状态，理解算法如何一步步得到结果。
+      </p>
       <div class="hero-actions">
-        <RouterLink class="primary-action glow-action" to="/home">开启旅程</RouterLink>
+        <RouterLink class="primary-action glow-action" to="/home">开始学习</RouterLink>
         <RouterLink class="secondary-action" to="/home">查看算法库</RouterLink>
       </div>
     </div>
 
-    <div class="cube-stage" aria-label="算法可视化动态预览">
-      <div class="cube-cluster">
-        <div
-          v-for="(height, index) in barHeights"
-          :key="index"
-          class="data-cube"
-          :class="`cube-${index + 1}`"
-          :style="{ '--cube-height': `${height}px`, '--delay': `${index * 90}ms` }"
-        >
-          <span>{{ height / 8 }}</span>
-        </div>
-      </div>
-      <div class="preview-console">
-        <div class="console-dot"></div>
-        <div class="console-lines">
-          <span>compare(arr[i], arr[i + 1])</span>
-          <span class="active-line">swap when left &gt; right</span>
-          <span>render current step</span>
-        </div>
+    <div class="landing-cube-stage" ref="stageRef" aria-label="算法数据柱鼠标悬浮动画">
+      <div
+        v-for="(cube, index) in cubes"
+        :key="cube.value"
+        class="hover-cube"
+        :class="{ hot: activeIndex === index, near: Math.abs(activeIndex - index) === 1 }"
+        :style="{
+          '--h': `${cube.height}px`,
+          '--delay': `${index * 50}ms`
+        }"
+      >
+        <div class="cuboid-face cuboid-front"><span>{{ cube.value }}</span></div>
+        <div class="cuboid-face cuboid-right"></div>
+        <div class="cuboid-face cuboid-top"></div>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-const barHeights = [104, 64, 136, 88, 152, 112, 72, 128, 96]
+const stageRef = ref<HTMLElement | null>(null)
+const activeIndex = ref(2)
+const cubes = [
+  { value: 9, height: 230 },
+  { value: 5, height: 142 },
+  { value: 16, height: 330 },
+  { value: 8, height: 190 },
+  { value: 11, height: 246 },
+  { value: 6, height: 158 }
+]
+
+function handlePointerMove(event: PointerEvent) {
+  const stage = stageRef.value
+  if (!stage) {
+    return
+  }
+
+  const rect = stage.getBoundingClientRect()
+  const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 0.999)
+  activeIndex.value = Math.floor(ratio * cubes.length)
+}
+
+function resetPointer() {
+  activeIndex.value = 2
+}
 </script>

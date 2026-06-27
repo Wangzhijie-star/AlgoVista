@@ -29,6 +29,13 @@
               <span v-for="value in visualBars(algorithm.slug)" :key="`${algorithm.slug}-${value}`" :style="{ height: `${value}px` }"></span>
             </div>
             <span class="difficulty-pill">{{ algorithm.difficulty }}</span>
+            <button
+              class="favorite-chip"
+              :class="{ active: favoriteIds.has(algorithm.id) }"
+              @click.prevent.stop="toggleFavorite(algorithm.id)"
+            >
+              {{ favoriteIds.has(algorithm.id) ? '已收藏' : '收藏' }}
+            </button>
             <h2>{{ algorithm.name }}</h2>
             <p>{{ algorithm.summary }}</p>
             <strong>进入演示</strong>
@@ -45,14 +52,14 @@
         </div>
 
         <div class="daily-challenge">
-          <span>{{ userStore.user ? '今日学习状态' : '登录后记录学习' }}</span>
-          <strong>{{ todayStudied ? '今日已完成打卡' : '完成一次算法演示后自动打卡' }}</strong>
-          <i :class="{ checked: todayStudied }"></i>
+          <span>{{ userStore.user ? '今日记录' : '登录后记录学习' }}</span>
+          <strong>{{ todayStudyCount > 0 ? `今日完成 ${todayStudyCount} 题` : '完成一次算法演示后自动打卡' }}</strong>
+          <i :class="{ checked: todayStudyCount > 0 }"></i>
         </div>
 
         <div class="study-stats">
           <div>
-            <span>连续提交</span>
+            <span>连续学习</span>
             <strong>{{ currentStreak }} 天</strong>
           </div>
           <div>
@@ -60,8 +67,8 @@
             <strong>{{ monthStudyDays }} 天</strong>
           </div>
           <div>
-            <span>每日一题</span>
-            <strong>{{ dailyChallengeStreak }} 连胜</strong>
+            <span>今日完成</span>
+            <strong>{{ todayStudyCount }} 题</strong>
           </div>
         </div>
 
@@ -76,7 +83,6 @@
         <div class="month-labels">
           <span v-for="month in monthLabels" :key="month">{{ month }}</span>
         </div>
-        <button class="analysis-button">进展分析</button>
       </aside>
     </div>
   </section>
@@ -84,16 +90,19 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { algorithmApi, type Algorithm, type AlgorithmCategory } from '../api/algorithm'
+import { favoriteApi } from '../api/favorite'
 import { studyApi, type StudyCalendar, type StudyDay } from '../api/study'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
+const router = useRouter()
 const categories = ref<AlgorithmCategory[]>([])
 const algorithms = ref<Algorithm[]>([])
 const selectedCategoryId = ref<number | undefined>()
 const studyCalendar = ref<StudyCalendar | null>(null)
+const favoriteIds = ref(new Set<number>())
 const fallbackCategories: AlgorithmCategory[] = [
   { id: 1, name: '排序算法', sortOrder: 1 },
   { id: 2, name: '图算法', sortOrder: 2 }
@@ -138,16 +147,17 @@ const fallbackAlgorithms: Algorithm[] = [
 ]
 
 const weekDays = computed(() => {
-  const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short' })
+  const labels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
   const today = new Date()
   const monday = new Date(today)
   const weekday = today.getDay() || 7
   monday.setDate(today.getDate() - weekday + 1)
-  return Array.from({ length: 7 }, (_, index) => {
+
+  return labels.map((label, index) => {
     const date = new Date(monday)
     date.setDate(monday.getDate() + index)
     return {
-      label: formatter.format(date).toUpperCase(),
+      label,
       date: date.getDate(),
       isToday: date.toDateString() === today.toDateString()
     }
@@ -156,10 +166,9 @@ const weekDays = computed(() => {
 const heatmapDays = computed(() => studyCalendar.value?.days ?? emptyStudyDays())
 const currentStreak = computed(() => studyCalendar.value?.currentStreak ?? 0)
 const monthStudyDays = computed(() => studyCalendar.value?.monthStudyDays ?? 0)
-const dailyChallengeStreak = computed(() => studyCalendar.value?.dailyChallengeStreak ?? 0)
-const todayStudied = computed(() => {
+const todayStudyCount = computed(() => {
   const today = toDateKey(new Date())
-  return heatmapDays.value.some((day) => day.date === today && day.studyCount > 0)
+  return heatmapDays.value.find((day) => day.date === today)?.studyCount ?? 0
 })
 const monthLabels = computed(() => {
   const labels = Array.from(new Set(heatmapDays.value.map((day) => `${Number(day.date.slice(5, 7))}月`)))
@@ -188,6 +197,7 @@ async function loadData() {
     algorithms.value = filterFallbackAlgorithms(selectedCategoryId.value)
   }
   await loadStudyCalendar()
+  await loadFavorites()
 }
 
 async function selectCategory(categoryId: number | undefined) {
@@ -215,6 +225,36 @@ async function loadStudyCalendar() {
   } catch {
     studyCalendar.value = null
   }
+}
+
+async function loadFavorites() {
+  if (!userStore.user) {
+    favoriteIds.value = new Set()
+    return
+  }
+  try {
+    const favorites = await favoriteApi.list()
+    favoriteIds.value = new Set(favorites.map((algorithm) => algorithm.id))
+  } catch {
+    favoriteIds.value = new Set()
+  }
+}
+
+async function toggleFavorite(algorithmId: number) {
+  if (!userStore.user) {
+    router.push('/auth')
+    return
+  }
+
+  const nextIds = new Set(favoriteIds.value)
+  if (nextIds.has(algorithmId)) {
+    await favoriteApi.remove(algorithmId)
+    nextIds.delete(algorithmId)
+  } else {
+    await favoriteApi.add(algorithmId)
+    nextIds.add(algorithmId)
+  }
+  favoriteIds.value = nextIds
 }
 
 function emptyStudyDays(): StudyDay[] {
